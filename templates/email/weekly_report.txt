@@ -1,0 +1,31 @@
+WEEKLY ATTENDANCE REPORT
+{{ week_start }} - {{ week_end }}
+
+Hello {{ student_name }},
+
+Here is your attendance summary for the past week:
+
+ATTENDANCE: {{ "%.1f"|format(percentage) }}%
+
+STATISTICS:
+- Total Classes: {{ total_sessions }}
+- Attended: {{ attended }}
+- Missed: {{ missed }}
+
+{% if missed_sessions %}
+MISSED SESSIONS:
+{% for session in missed_sessions %}
+- {{ session.subject.name }} ({{ session.subject.code }})
+  {{ session.start_time.strftime('%A, %B %d at %I:%M %p') }}
+{% endfor %}
+{% endif %}
+
+RECOMMENDATION:
+{{ recommendation }}
+
+Student ID: {{ student_id }}
+Report Generated: {{ week_end }}
+
+---
+This is an automated report from the Smart Attendance System.
+© {{ year }} Smart Attendance System. All rights reserved.

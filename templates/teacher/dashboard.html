@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard | Faculty Portal{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-100/90 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+
+        <!-- EXECUTIVE HEADER BANNER -->
+        <div class="rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-slate-800" 
+             style="background-color: #0f172a !important; color: #ffffff !important;">
+            <div class="space-y-2">
+                <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold tracking-wider" 
+                      style="background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    FACULTY DASHBOARD
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-1">
+                    Welcome, {{ user.full_name }}
+                </h1>
+                <p class="text-sm text-slate-300 font-medium">
+                    Smart Attendance & Course Management System
+                </p>
+            </div>
+
+            <a href="{{ url_for('teacher.create_session') }}" 
+               class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition shadow-lg hover:opacity-90 whitespace-nowrap"
+               style="background-color: #059669 !important; color: #ffffff !important;">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+                Create New Session
+            </a>
+        </div>
+
+        <!-- FACULTY OVERVIEW STATISTICS (3 CARDS) -->
+        <div>
+            <h2 class="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest mb-4">Faculty Overview</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                
+                <!-- STAT 1: TOTAL SUBJECTS -->
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Subjects</p>
+                        <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ subjects|length }}</h3>
+                        <p class="text-[11px] text-emerald-600 font-semibold mt-1">✓ Assigned Courses</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: #d1fae5; color: #047857;">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- STAT 2: TODAY'S SESSIONS -->
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Classes</p>
+                        <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ today_sessions|length }}</h3>
+                        <p class="text-[11px] text-teal-600 font-semibold mt-1">Scheduled for Today</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: #ccfbf1; color: #0f766e;">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- STAT 3: UPCOMING SESSIONS -->
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Upcoming Classes</p>
+                        <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ upcoming_sessions|length }}</h3>
+                        <p class="text-[11px] text-indigo-600 font-semibold mt-1">Future Timetable</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: #e0e7ff; color: #4338ca;">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ACTION CARDS WITH DISTINCT AUTHENTIC LOGOS -->
+        <div>
+            <h2 class="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Navigation</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                
+                <!-- 1. CREATE SESSION CARD -->
+                <a href="{{ url_for('teacher.create_session') }}" 
+                   class="group p-6 rounded-2xl bg-white border-2 border-emerald-200 hover:border-emerald-500 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform" 
+                             style="background-color: #059669 !important; color: #ffffff !important;">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Create Session</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">Schedule new lecture timetable</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
+                        <span>Open Form</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                </a>
+
+                <!-- Open the logged-in professor's own latest session. Never hardcode session IDs. -->
+                <a href="{{ url_for('teacher.qr_attendance') }}" 
+                   class="group p-6 rounded-2xl bg-white border-2 border-teal-200 hover:border-teal-500 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform" 
+                             style="background-color: #0d9488 !important; color: #ffffff !important;">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 14h3v3h-3zm4 4h3v3h-3zm0-4h3m-7 7h3"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">QR Code Attendance</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">Launch live QR display screen</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-700">
+                        <span>Open QR Display</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                </a>
+
+                <!-- 3. STUDENT RECORDS CARD -->
+                <a href="#subjects" 
+                   class="group p-6 rounded-2xl bg-white border-2 border-indigo-200 hover:border-indigo-500 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform" 
+                             style="background-color: #4f46e5 !important; color: #ffffff !important;">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Student Records</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">View enrolled student rosters</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-700">
+                        <span>View Records</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                </a>
+
+                <!-- 4. UPLOAD ATTENDANCE CARD -->
+                <a href="{{ url_for('teacher.upload_attendance') }}" 
+                   class="group p-6 rounded-2xl bg-white border-2 border-purple-200 hover:border-purple-500 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform" 
+                             style="background-color: #9333ea !important; color: #ffffff !important;">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Upload Attendance</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">Import CSV or Excel (.xlsx) files</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-700">
+                        <span>Upload File</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- MY ASSIGNED SUBJECTS SECTION -->
+        <div id="subjects" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">My Assigned Subjects</h2>
+                    <p class="text-xs text-slate-500 mt-1">Active courses assigned to your faculty profile</p>
+                </div>
+                <span class="px-3.5 py-1 rounded-full text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ subjects|length }} Subjects
+                </span>
+            </div>
+
+            {% if subjects %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for subject in subjects %}
+                <div class="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 hover:border-slate-300 transition-all space-y-2">
+                    <div class="flex justify-between items-start gap-2">
+                        <h3 class="font-bold text-slate-900 text-base leading-snug">{{ subject.name }}</h3>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-slate-200 text-slate-800">
+                            {{ subject.code }}
+                        </span>
+                    </div>
+                    {% if subject.description %}
+                    <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">{{ subject.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-slate-500 text-sm text-center py-6">No subjects assigned yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- TODAY'S SCHEDULE SECTION (WITH EXCEL EXPORT LINK) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Today's Schedule</h2>
+                    <p class="text-xs text-slate-500 mt-1">Classes scheduled for today</p>
+                </div>
+            </div>
+
+            {% if today_sessions %}
+            <div class="space-y-3">
+                {% for session in today_sessions %}
+                <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-slate-100/60 transition">
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-slate-900 text-base">{{ session.subject.name }}</h3>
+                        <p class="text-xs text-emerald-700 font-semibold mt-1">
+                            🕒 {{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}
+                        </p>
+                        {% if session.location_name %}
+                        <p class="text-xs text-slate-500 mt-0.5">📍 {{ session.location_name }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- Direct Link to View Session / Live QR -->
+                        <a href="{{ url_for('teacher.view_session', session_id=session.id) }}" 
+                           class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap">
+                            View QR Display
+                        </a>
+                        <!-- Direct Export Excel Button -->
+                        <a href="{{ url_for('teacher.export_excel', session_id=session.id) }}" 
+                           class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                            </svg>
+                            Export Excel
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-slate-500 text-sm text-center py-6">No sessions scheduled for today.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

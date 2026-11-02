@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ error }} - Smart Attendance{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-8rem)] flex items-center justify-center py-4">
+    <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-lg text-center">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ error }}</h1>
+        <p class="text-gray-600 mb-6">{{ message }}</p>
+        <a href="{{ url_for('index') }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200">
+            Go Back Home
+        </a>
+    </div>
+</div>
+{% endblock %}

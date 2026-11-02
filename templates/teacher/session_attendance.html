@@ -1,0 +1,136 @@
+
+{% extends "base.html" %}
+
+{% block title %}Session Attendance{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-2 sm:px-0">
+
+    <!-- Header -->
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <a href="{{ url_for('teacher.view_session', session_id=class_session.id) }}"
+           class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+            &larr; Back to Session
+        </a>
+
+        <a href="{{ url_for('teacher.export_excel', session_id=class_session.id) }}"
+           class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-semibold text-sm shadow-sm transition">
+
+            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/>
+            </svg>
+
+            Export to Excel (.xlsx)
+        </a>
+    </div>
+
+    <!-- Attendance Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-5 md:p-6">
+
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 break-words">
+            Attendance for {{ class_session.subject.name }}
+        </h1>
+
+        <p class="text-sm text-gray-600 mb-5">
+            {{ class_session.start_time.strftime('%A, %B %d, %Y at %I:%M %p') }}
+        </p>
+
+        {% if attendance_records %}
+
+        <div class="overflow-x-auto -mx-3 sm:mx-0">
+            <table class="min-w-full divide-y divide-gray-200">
+
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Student</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Distance</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Time</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden lg:table-cell">IP Address</th>
+                    </tr>
+                </thead>
+
+                <tbody class="bg-white divide-y divide-gray-100">
+
+                    {% for record in attendance_records %}
+
+                    <tr class="hover:bg-gray-50 transition">
+
+                        <td class="px-4 py-4">
+                            <div class="font-semibold text-gray-900 text-sm">
+                                {{ record.student.full_name }}
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                {{ record.student.student_id }}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-4">
+
+                            {% if record.verification_status == 'VERIFIED' %}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Verified
+                            </span>
+
+                            {% elif record.verification_status == 'MANUAL_PRESENT' %}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                Manual Present
+                            </span>
+
+                            {% else %}
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                {{ record.verification_status }}
+                            </span>
+                            {% endif %}
+
+                            <div class="text-xs text-gray-500 sm:hidden mt-2">
+                                {% if record.verification_status == 'VERIFIED' %}
+                                    {{ '%.1f'|format(record.distance_meters) }}m
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-gray-500 hidden sm:table-cell">
+                            {% if record.verification_status == 'VERIFIED' %}
+                                {{ '%.1f'|format(record.distance_meters) }}m
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-gray-500 hidden md:table-cell">
+                            {{ record.timestamp.strftime('%I:%M:%S %p') }}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-gray-500 hidden lg:table-cell break-all">
+                            {{ record.ip_address or '—' }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="text-center py-10">
+            <p class="text-gray-500 font-medium">
+                No attendance records yet.
+            </p>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

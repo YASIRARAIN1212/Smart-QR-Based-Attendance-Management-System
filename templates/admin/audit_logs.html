@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6 md:mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Audit Logs</h1>
+    <p class="text-sm sm:text-base text-gray-600">System activity and security logs</p>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase">Timestamp</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">User</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Entity</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">IP Address</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Details</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for log in logs.items %}
+                <tr>
+                    <td class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500">
+                        <div class="sm:hidden">{{ log.timestamp.strftime('%m/%d %I:%M %p') }}</div>
+                        <div class="hidden sm:block">{{ log.timestamp.strftime('%Y-%m-%d %I:%M %p') }}</div>
+                    </td>
+                    <td class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900 break-words">
+                        {{ log.action }}
+                        <div class="text-xs text-gray-500 sm:hidden mt-1">
+                            {% if log.user_id %}User #{{ log.user_id }}{% else %}System{% endif %}
+                        </div>
+                    </td>
+                    <td class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden sm:table-cell">
+                        {% if log.user_id %}User #{{ log.user_id }}{% else %}System{% endif %}
+                    </td>
+                    <td class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden md:table-cell">
+                        {% if log.entity_type %}{{ log.entity_type }} #{{ log.entity_id }}{% else %}-{% endif %}
+                    </td>
+                    <td class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden lg:table-cell">
+                        {{ log.ip_address if log.ip_address else '-' }}
+                    </td>
+                    <td class="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden lg:table-cell break-words">
+                        {{ log.details[:100] if log.details else '-' }}{% if log.details and log.details|length > 100 %}...{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if logs.has_prev or logs.has_next %}
+    <div class="bg-gray-50 px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div class="text-xs sm:text-sm text-center sm:text-left">
+            Page {{ logs.page }} of {{ logs.pages }}
+        </div>
+        <div class="flex gap-2 justify-center sm:justify-end">
+            {% if logs.has_prev %}
+            <a href="{{ url_for('admin.audit_logs', page=logs.prev_num) }}" 
+               class="bg-white border border-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded hover:bg-gray-50 text-xs sm:text-sm">
+                Previous
+            </a>
+            {% endif %}
+            {% if logs.has_next %}
+            <a href="{{ url_for('admin.audit_logs', page=logs.next_num) }}" 
+               class="bg-white border border-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded hover:bg-gray-50 text-xs sm:text-sm">
+                Next
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Clear Audit Logs Section -->
+<div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-red-50 px-4 sm:px-6 py-4 border-b border-red-200">
+        <h2 class="text-lg font-semibold text-red-800">⚠️ Danger Zone</h2>
+        <p class="text-sm text-red-600 mt-1">This action cannot be undone.</p>
+    </div>
+    
+    <div class="px-4 sm:px-6 py-4">
+        <form method="POST" action="{{ url_for('admin.clear_audit_logs') }}" onsubmit="return confirm('Are you absolutely sure you want to clear ALL audit logs? This action cannot be undone!');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm" for="admin_password">
+                    Verify Admin Password to Clear Audit Logs
+                </label>
+                <input type="password" 
+                       id="admin_password" 
+                       name="admin_password" 
+                       required
+                       class="w-full max-w-md px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                       placeholder="Enter your admin password">
+                <p class="text-xs text-gray-500 mt-1">You must enter your password to confirm this destructive action.</p>
+            </div>
+            
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 text-sm">
+                Clear All Audit Logs
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

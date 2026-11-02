@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Manual Attendance Upload{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
+<h1 class="text-2xl font-bold mb-4">Manual Attendance Upload</h1>
+<p class="text-gray-600 mb-4">CSV or Excel (.xlsx) requires a student_id column. Imported records are labelled MANUAL_PRESENT, not QR/GPS verified.</p>
+<form method="post" enctype="multipart/form-data" action="{{ url_for('teacher.upload_attendance') }}">
+<label class="block mb-2 font-semibold">Class Session</label>
+<select class="w-full border rounded p-3 mb-4" name="session_id" required>
+<option value="">Choose session</option>
+{% for class_session in sessions %}
+<option value="{{ class_session.id }}">{{ class_session.subject.name }} — Session {{ class_session.id }}</option>
+{% endfor %}
+</select>
+<label class="block mb-2 font-semibold">CSV or Excel file</label>
+<input class="w-full border rounded p-3 mb-4" type="file" name="attendance_file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+<button class="bg-indigo-600 text-white rounded px-5 py-3" type="submit">Import Manual Attendance</button>
+</form></div>
+{% endblock %}

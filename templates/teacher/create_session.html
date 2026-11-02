@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Create Session - Teacher Portal{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+    #map {
+        height: 300px;
+        width: 100%;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        touch-action: manipulation;
+    }
+    
+    @media (min-width: 640px) {
+        #map {
+            height: 400px;
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        #map {
+            height: 450px;
+        }
+    }
+    
+    .leaflet-container {
+        font-family: inherit;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Create New Session</h1>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form method="POST" id="sessionForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Subject Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Subject <span class="text-red-500">*</span>
+                    </label>
+                    <select name="subject_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Subject</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.code }} - {{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Start Time -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Start Time <span class="text-red-500">*</span>
+                    </label>
+                    <input type="datetime-local" name="start_time" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <!-- End Time -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        End Time <span class="text-red-500">*</span>
+                    </label>
+                    <input type="datetime-local" name="end_time" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+            </div>
+            
+            <!-- Location Map Section -->
+            <div class="mt-6 border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    Session Location
+                    <button type="button" onclick="getCurrentLocation(event)" class="ml-2 text-sm text-blue-600 hover:underline">
+                        📍 Use Current Location
+                    </button>
+                </h3>
+                
+                <p class="text-sm text-gray-600 mb-4">
+                    Click on the map to select the session location, or use the button above to use your current location.
+                </p>
+                
+                <!-- Interactive Map -->
+                <div id="map" class="shadow-md"></div>
+                
+                <!-- Coordinates Display -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Latitude</label>
+                        <input type="number" step="any" name="location_lat" id="location_lat" required
+                               class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                               placeholder="Click map to select" readonly>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Longitude</label>
+                        <input type="number" step="any" name="location_lng" id="location_lng" required
+                               class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                               placeholder="Click map to select" readonly>
+                    </div>
+                    
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Location Name (Optional)</label>
+                        <input type="text" name="location_name" id="location_name"
+                               class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="e.g., Room 101">
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+            
+            <!-- Compensation Session Options -->
+            <div class="mt-6 border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Compensation Session</h3>
+                
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_compensation" id="is_compensation" 
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                               onchange="toggleCompensationOptions()">
+                        <span class="ml-2 text-sm text-gray-700">
+                            This session compensates for a missed/cancelled session
+                        </span>
+                    </label>
+                </div>
+                
+                <div id="compensation_options" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Select Session Being Compensated
+                    </label>
+                    <select name="compensates_session_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Select Session --</option>
+                        {% for session in past_sessions %}
+                        <option value="{{ session.id }}">
+                            {{ session.subject.code }} - {{ session.start_time.strftime('%b %d, %Y %H:%M') }} 
+                            {% if session.location_name %}({{ session.location_name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Select which past session this makeup class is compensating for
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Notes -->
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Notes / Description
+                </label>
+                <textarea name="notes" rows="3"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder="Optional notes about this session"></textarea>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="mt-6 flex gap-4">
+                <button type="submit" 
+                        class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Create Session
+                </button>
+                <a href="{{ url_for('teacher.dashboard') }}" 
+                   class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let map;
+let marker;
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const defaultLat = 24.9460;
+        const defaultLng = 67.1069;
+        
+        // Initialize map with mobile-friendly settings
+        map = L.map('map', {
+            center: [defaultLat, defaultLng],
+            zoom: 13,
+            zoomControl: true,
+            tap: true,
+            dragging: true,
+            touchZoom: true,
+            scrollWheelZoom: true
+        });
+        
+        // Add tile layer with error handling
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19,
+            minZoom: 3
+        }).addTo(map);
+        
+        // Fix map size after initialization (important for mobile)
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 100);
+        
+        // Handle click events on map
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            marker = L.marker([lat, lng]).addTo(map);
+            
+            document.getElementById('location_lat').value = lat.toFixed(6);
+            document.getElementById('location_lng').value = lng.toFixed(6);
+        });
+        
+        // Handle orientation changes (mobile)
+        window.addEventListener('orientationchange', function() {
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 200);
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 200);
+        });
+        
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        alert('Map failed to load. Please refresh the page.');
+    }
+});
+
+function toggleCompensationOptions() {
+    const checkbox = document.getElementById('is_compensation');
+    const options = document.getElementById('compensation_options');
+    
+    if (checkbox.checked) {
+        options.classList.remove('hidden');
+    } else {
+        options.classList.add('hidden');
+    }
+}
+
+function getCurrentLocation(e) {
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser');
+        return;
+    }
+    
+    const locationButton = e && e.target ? e.target : null;
+    if (locationButton) {
+        locationButton.textContent = '⏳ Getting location...';
+        locationButton.disabled = true;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            try {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                document.getElementById('location_lat').value = lat.toFixed(6);
+                document.getElementById('location_lng').value = lng.toFixed(6);
+                
+                map.setView([lat, lng], 16);
+                
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                marker = L.marker([lat, lng]).addTo(map);
+                
+                alert('Location captured successfully!');
+            } catch (error) {
+                console.error('Error setting location:', error);
+                alert('Error setting location on map');
+            } finally {
+                if (locationButton) {
+                    locationButton.textContent = '📍 Use Current Location';
+                    locationButton.disabled = false;
+                }
+            }
+        },
+        function(error) {
+            let errorMsg = 'Error getting location: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg += 'Please enable location permissions';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg += 'Location information unavailable';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg += 'Location request timed out';
+                    break;
+                default:
+                    errorMsg += error.message;
+            }
+            alert(errorMsg);
+            if (locationButton) {
+                locationButton.textContent = '📍 Use Current Location';
+                locationButton.disabled = false;
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+</script>
+{% endblock %}

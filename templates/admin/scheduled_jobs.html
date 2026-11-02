@@ -1,0 +1,419 @@
+
+{% extends "base.html" %}
+
+{% block title %}Scheduled Jobs | CampusAttend{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto px-5 py-8 space-y-7">
+
+    <!-- PAGE HEADER -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">
+                Scheduled Jobs
+            </h1>
+
+            <p class="text-slate-500 mt-2">
+                Manage automated attendance reports and background tasks.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2 px-4 py-2 rounded-xl border bg-white shadow-sm">
+
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full
+                    {% if running %}bg-green-400{% else %}bg-red-400{% endif %}
+                    opacity-75"></span>
+
+                <span class="relative inline-flex rounded-full h-3 w-3
+                    {% if running %}bg-green-600{% else %}bg-red-600{% endif %}"></span>
+            </span>
+
+            <span class="text-sm font-semibold
+                {% if running %}text-green-700{% else %}text-red-700{% endif %}">
+
+                {% if running %}
+                    Scheduler Running
+                {% else %}
+                    Scheduler Stopped
+                {% endif %}
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY CARDS -->
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">
+                        Registered Jobs
+                    </p>
+
+                    <h2 class="text-3xl font-bold text-slate-900 mt-2">
+                        {{ jobs|length }}
+                    </h2>
+                </div>
+
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-indigo-600"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                    </svg>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">
+                        Scheduler Status
+                    </p>
+
+                    <h2 class="text-2xl font-bold mt-2
+                        {% if running %}text-green-700{% else %}text-red-600{% endif %}">
+
+                        {% if running %}
+                            Operational
+                        {% else %}
+                            Offline
+                        {% endif %}
+
+                    </h2>
+                </div>
+
+                <div class="w-12 h-12 rounded-xl
+                    {% if running %}bg-green-50{% else %}bg-red-50{% endif %}
+                    flex items-center justify-center">
+
+                    <svg class="w-6 h-6
+                        {% if running %}text-green-600{% else %}text-red-600{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.292 9 11.622C17.176 19.292 21 14.591 21 9c0-1.07-.14-2.107-.4-3.075z"/>
+                    </svg>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SCHEDULED JOBS TABLE -->
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+        <div class="px-6 py-5 border-b border-slate-200">
+
+            <h2 class="text-xl font-bold text-slate-900">
+                Scheduled Tasks
+            </h2>
+
+            <p class="text-sm text-slate-500 mt-1">
+                View registered background tasks and their execution schedules.
+            </p>
+
+        </div>
+
+
+        {% if jobs %}
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full text-left">
+
+                <thead class="bg-slate-50">
+
+                    <tr>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Job Name
+                        </th>
+
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Frequency
+                        </th>
+
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Next Execution
+                        </th>
+
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Status
+                        </th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for job in jobs %}
+
+                    <tr class="hover:bg-slate-50 transition">
+
+                        <td class="px-6 py-5">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+
+                                    <svg class="w-5 h-5 text-indigo-600"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+
+                                </div>
+
+                                <div>
+                                    <p class="font-semibold text-slate-900">
+                                        {{ job.name }}
+                                    </p>
+
+                                    <p class="text-xs text-slate-400 mt-1">
+                                        ID: {{ job.id }}
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="px-6 py-5">
+
+                            <span class="inline-flex items-center px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 text-sm font-semibold">
+
+                                Every Monday at 07:00 AM
+
+                            </span>
+
+                        </td>
+
+
+                        <td class="px-6 py-5">
+
+                            <p class="text-sm font-medium text-slate-800">
+                                {{ job.next_run }}
+                            </p>
+
+                        </td>
+
+
+                        <td class="px-6 py-5">
+
+                            {% if running %}
+
+                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold">
+
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Active
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 text-red-700 text-xs font-bold">
+
+                                <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                Scheduler Offline
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="px-6 py-12 text-center">
+
+            <div class="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+
+                <svg class="w-8 h-8 text-amber-500"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 2.57h16.94A2 2 0 0022.18 18L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+
+            </div>
+
+            <h3 class="font-bold text-slate-900">
+                No Scheduled Jobs Found
+            </h3>
+
+            <p class="text-sm text-slate-500 mt-2">
+                No background jobs are currently registered with the scheduler.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- MANUAL EXECUTION -->
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+        <div class="p-6 sm:p-7">
+
+            <div class="flex items-start gap-4">
+
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+
+                    <svg class="w-6 h-6 text-indigo-600"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.868v4.264a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+
+                </div>
+
+                <div class="flex-1">
+
+                    <h2 class="text-xl font-bold text-slate-900">
+                        Run Weekly Reports Now
+                    </h2>
+
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        Manually execute the weekly attendance reporting task.
+                        Reports will be sent to all active students and configured
+                        family addresses. Make sure your SMTP credentials are configured.
+                    </p>
+
+                    <div class="mt-4 flex flex-wrap gap-2">
+
+                        <span class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold">
+                            Manual Execution
+                        </span>
+
+                        <span class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold">
+                            Email Delivery
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="{{ url_for('admin.trigger_job') }}"
+                class="mt-6 pt-5 border-t border-slate-100"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="job_type"
+                    value="weekly_reports"
+                >
+
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-sm transition focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                    onclick="return confirm('Are you sure you want to send weekly attendance reports to all active students now? This may send many emails.')"
+                >
+
+                    <svg class="w-5 h-5"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M5 12h14m-7-7l7 7-7 7"/>
+                    </svg>
+
+                    Send Weekly Reports
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- EMAIL SETTINGS LINK -->
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
+
+        <div>
+
+            <h3 class="font-semibold text-slate-800">
+                Email Configuration
+            </h3>
+
+            <p class="text-sm text-slate-500 mt-1">
+                Manage SMTP settings and test email delivery.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('admin.email_settings') }}"
+            class="inline-flex items-center gap-2 text-indigo-700 hover:text-indigo-900 font-semibold text-sm"
+        >
+
+            Configure Email
+
+            <svg class="w-4 h-4"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"/>
+            </svg>
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

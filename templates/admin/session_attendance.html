@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Session Attendance | CampusAttend{% endblock %}
+{% block content %}
+<a href="{{ url_for('admin.qr_attendance') }}" class="text-emerald-700">← All sessions</a>
+<h1 class="text-3xl font-bold my-4">{{ session_item.subject.name }} — Session #{{ session_item.id }}</h1>
+<p class="text-slate-600 mb-5">{{ session_item.start_time.strftime('%Y-%m-%d %H:%M') }} UTC · {{ session_item.subject.code }}</p>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+{% for title, value in [('Enrolled', enrolled_count), ('Present', verified_count), ('Absent', absent_count), ('Attendance %', attendance_percent|string + '%')] %}
+<div class="bg-white border rounded-xl p-5"><p class="text-slate-500 text-sm">{{ title }}</p><p class="text-2xl font-bold">{{ value }}</p></div>{% endfor %}</div>
+<div class="bg-white rounded-xl border overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-slate-100"><tr><th class="text-left p-3">Roll number</th><th class="text-left p-3">Student</th><th class="text-left p-3">Status</th><th class="text-left p-3">Recorded (UTC)</th></tr></thead><tbody>
+{% for u in roster %}{% set r = by_student.get(u.id) %}<tr class="border-t"><td class="p-3">{{ u.student_id }}</td><td class="p-3">{{ u.full_name }}</td><td class="p-3">{% if r and r.verification_status == 'VERIFIED' %}<span class="text-emerald-700 font-bold">Present</span>{% else %}<span class="text-red-700 font-bold">Absent</span>{% if r %} ({{ r.verification_status }}){% endif %}{% endif %}</td><td class="p-3">{{ r.timestamp.strftime('%Y-%m-%d %H:%M') if r and r.timestamp else '—' }}</td></tr>{% else %}<tr><td colspan="4" class="p-4">No students enrolled in this subject.</td></tr>{% endfor %}</tbody></table></div>
+<p class="text-xs text-slate-500 mt-4">Present means VERIFIED attendance. Pending and rejected records do not count as present. Demonstration data is synthetic.</p>
+{% endblock %}

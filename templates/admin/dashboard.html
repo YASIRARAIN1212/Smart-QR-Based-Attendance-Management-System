@@ -1,0 +1,1220 @@
+
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Smart Attendance{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ========================================
+       ADMIN DASHBOARD — PROFESSIONAL DESIGN
+       ======================================== */
+
+    .dashboard-page {
+        --dash-primary: #087f67;
+        --dash-dark: #075b4c;
+        --dash-ink: #14283e;
+        --dash-muted: #71839a;
+        --dash-border: #e1eaf0;
+        width: 100%;
+        max-width: none;
+        color: var(--dash-ink);
+    }
+
+    .dashboard-page * {
+        box-sizing: border-box;
+    }
+
+    .dashboard-page a {
+        text-decoration: none;
+    }
+
+    /* WELCOME HERO */
+
+    .dash-hero {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+        min-height: 245px;
+        padding: 36px 40px;
+        border: 1px solid #cde9df;
+        border-radius: 18px;
+        background:
+            radial-gradient(circle at 78% 85%, #b7e5d4 0%, transparent 37%),
+            linear-gradient(110deg, #ffffff 0%, #effaf5 54%, #c6eadc 100%);
+    }
+
+    .dash-hero::before {
+        content: "";
+        position: absolute;
+        top: -240px;
+        right: 10%;
+        width: 430px;
+        height: 430px;
+        border: 55px solid #ffffff65;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .dash-hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 680px;
+    }
+
+    .dash-eyebrow {
+        color: #087f67;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+    }
+
+    .dash-hero h1 {
+        margin: 17px 0 15px;
+        color: #14283e;
+        font-size: clamp(29px, 3.4vw, 46px);
+        font-weight: 850;
+        line-height: 1.16;
+        letter-spacing: -1.4px;
+    }
+
+    .dash-hero h1 span {
+        color: #25856c;
+    }
+
+    .dash-hero-description {
+        max-width: 630px;
+        margin: 0;
+        color: #5e7589;
+        font-size: 13px;
+        line-height: 1.9;
+    }
+
+    .dash-date-card {
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+        width: 235px;
+        padding: 22px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #075b4c, #258b70);
+        color: #ffffff;
+        box-shadow: 0 12px 26px #075b4c25;
+    }
+
+    .dash-date-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 17px;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .dash-date-row svg {
+        width: 20px;
+        height: 20px;
+        color: #b1f6dd;
+        flex-shrink: 0;
+    }
+
+    .dash-date-footer {
+        margin-top: 18px;
+        padding-top: 15px;
+        border-top: 1px solid #ffffff40;
+        color: #c4f8e7;
+        font-size: 11px;
+    }
+
+    /* STATISTICS */
+
+    .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+    }
+
+    .dash-stat {
+        min-width: 0;
+        min-height: 192px;
+        padding: 23px;
+        border: 1px solid;
+        border-radius: 16px;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .dash-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px #17384b10;
+    }
+
+    .dash-stat.users {
+        background: linear-gradient(145deg, #f9fffc, #eafaf2);
+        border-color: #d2efdf;
+    }
+
+    .dash-stat.subjects {
+        background: linear-gradient(145deg, #ffffff, #eef7ff);
+        border-color: #d8e8f8;
+    }
+
+    .dash-stat.sessions {
+        background: linear-gradient(145deg, #ffffff, #f5efff);
+        border-color: #e7dcf8;
+    }
+
+    .dash-stat.attendance {
+        background: linear-gradient(145deg, #ffffff, #fff3e8);
+        border-color: #f4e1cd;
+    }
+
+    .dash-stat-top {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .dash-stat-icon {
+        display: grid;
+        place-items: center;
+        width: 51px;
+        height: 51px;
+        flex-shrink: 0;
+        border-radius: 13px;
+    }
+
+    .dash-stat-icon svg {
+        width: 25px;
+        height: 25px;
+    }
+
+    .users .dash-stat-icon {
+        background: #cdf6e0;
+        color: #008466;
+    }
+
+    .subjects .dash-stat-icon {
+        background: #dcecff;
+        color: #237fc6;
+    }
+
+    .sessions .dash-stat-icon {
+        background: #e8dbff;
+        color: #8951d6;
+    }
+
+    .attendance .dash-stat-icon {
+        background: #ffead5;
+        color: #df8528;
+    }
+
+    .dash-stat-label {
+        color: #38516a;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .dash-stat-value {
+        margin-top: 5px;
+        color: #14283e;
+        font-size: clamp(28px, 2.7vw, 38px);
+        font-weight: 850;
+        line-height: 1.15;
+    }
+
+    .dash-stat-bottom {
+        margin-top: 24px;
+        padding-top: 14px;
+        border-top: 1px solid #dce7ec90;
+        color: #667d91;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    .dash-stat-bottom strong {
+        color: #14283e;
+    }
+
+    /* SECTION HEADING */
+
+    .dash-section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin: 28px 0 16px;
+    }
+
+    .dash-section-heading h2 {
+        margin: 0;
+        color: #14283e;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .dash-section-heading p {
+        margin: 5px 0 0;
+        color: #8192a3;
+        font-size: 12px;
+    }
+
+    /* QUICK ACCESS */
+
+    .dash-shortcuts {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .dash-shortcut {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid #e1eaf0;
+        border-radius: 13px;
+        background: white;
+        color: #14283e;
+        transition: border-color .2s, transform .2s;
+    }
+
+    .dash-shortcut:hover {
+        border-color: #6bc7aa;
+        transform: translateY(-2px);
+    }
+
+    .dash-shortcut-icon {
+        display: grid;
+        place-items: center;
+        width: 43px;
+        height: 43px;
+        flex-shrink: 0;
+        border-radius: 11px;
+        background: #e8f8f1;
+        color: #087f67;
+    }
+
+    .dash-shortcut-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .dash-shortcut strong {
+        display: block;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .dash-shortcut small {
+        display: block;
+        margin-top: 5px;
+        color: #8393a4;
+        font-size: 10px;
+    }
+
+    /* SCHEDULED JOBS */
+
+    .dash-jobs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .dash-job {
+        min-width: 0;
+        padding: 24px;
+        border: 1px solid #e1eaf0;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 16px #17384b08;
+    }
+
+    .dash-job-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .dash-job-icon {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        border-radius: 13px;
+        background: #e1f9ed;
+        color: #087f67;
+    }
+
+    .dash-job-icon.blue {
+        background: #e5f2ff;
+        color: #237fc6;
+    }
+
+    .dash-job-icon svg {
+        width: 25px;
+        height: 25px;
+    }
+
+    .dash-job h3 {
+        margin: 0;
+        color: #14283e;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .dash-job-description {
+        margin: 6px 0 0;
+        color: #77899b;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .dash-job-controls {
+        display: flex;
+        align-items: stretch;
+        gap: 11px;
+        margin-top: 23px;
+    }
+
+    .dash-schedule {
+        flex: 1;
+        padding: 12px 14px;
+        border: 1px solid #cdeedf;
+        border-radius: 10px;
+        background: #effbf5;
+    }
+
+    .dash-schedule-label {
+        color: #087f67;
+        font-size: 10px;
+        font-weight: 750;
+    }
+
+    .dash-schedule-value {
+        margin-top: 5px;
+        color: #294659;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .dash-button {
+        padding: 12px 19px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(110deg, #075b4c, #168c73);
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background .2s;
+    }
+
+    .dash-button:hover {
+        background: #064d40;
+    }
+
+    .dash-email-input {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 14px;
+        border: 1px solid #d9e5ed;
+        border-radius: 10px;
+        background: #fbfdff;
+        color: #14283e;
+        font-size: 12px;
+        outline: none;
+    }
+
+    .dash-email-input:focus {
+        border-color: #087f67;
+        box-shadow: 0 0 0 3px #087f6718;
+    }
+
+    /* RECENT ACTIVITY */
+
+    .dash-activity {
+        padding: 23px;
+        border: 1px solid #e1eaf0;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 16px #17384b08;
+    }
+
+    .dash-activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .dash-activity-title {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .dash-activity-icon {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: #e4f9f1;
+        color: #087f67;
+    }
+
+    .dash-activity-icon svg {
+        width: 23px;
+        height: 23px;
+    }
+
+    .dash-activity h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .dash-activity-subtitle {
+        margin: 5px 0 0;
+        color: #8293a4;
+        font-size: 11px;
+    }
+
+    .dash-outline-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 15px;
+        border: 1px solid #dce7ed;
+        border-radius: 9px;
+        color: #294659;
+        font-size: 11px;
+        font-weight: 800;
+        background: white;
+        white-space: nowrap;
+    }
+
+    .dash-outline-button:hover {
+        border-color: #087f67;
+        color: #087f67;
+    }
+
+    .dash-table-wrapper {
+        overflow-x: auto;
+        border: 1px solid #e1eaf0;
+        border-radius: 11px;
+    }
+
+    .dash-table {
+        width: 100%;
+        min-width: 600px;
+        border-collapse: collapse;
+    }
+
+    .dash-table th {
+        padding: 15px 17px;
+        background: #f5f8fb;
+        color: #4d6377;
+        font-size: 11px;
+        font-weight: 800;
+        text-align: left;
+    }
+
+    .dash-table td {
+        padding: 15px 17px;
+        border-top: 1px solid #eaf0f4;
+        color: #607589;
+        font-size: 12px;
+        line-height: 1.7;
+        vertical-align: middle;
+    }
+
+    .dash-table tbody tr:hover {
+        background: #f8fcfa;
+    }
+
+    .dash-table-action {
+        color: #14283e !important;
+        font-weight: 750;
+    }
+
+    .dash-user-badge {
+        display: inline-block;
+        padding: 5px 11px;
+        border-radius: 20px;
+        background: #eaf3ff;
+        color: #2478b9;
+        font-size: 11px;
+        font-weight: 750;
+    }
+
+    .dash-user-badge.system {
+        background: #e7f8ef;
+        color: #087f67;
+    }
+
+    .dash-empty {
+        padding: 50px 20px;
+        text-align: center;
+        color: #8293a4;
+        font-size: 12px;
+    }
+
+    .dash-empty strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #294659;
+        font-size: 15px;
+    }
+
+    .dash-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 24px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1250px) {
+        .dash-stats,
+        .dash-shortcuts {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 1050px) {
+        .dash-jobs {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .dash-hero {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 26px;
+        }
+
+        .dash-date-card {
+            width: 100%;
+        }
+
+        .dash-stats,
+        .dash-shortcuts {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-activity-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dash-job-controls {
+            flex-direction: column;
+        }
+
+        .dash-button {
+            width: 100%;
+        }
+
+        .dash-hero h1 {
+            font-size: 29px;
+        }
+
+        .dash-job {
+            padding: 18px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dash-stat,
+        .dash-shortcut {
+            transition: none;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <!-- =====================================
+         WELCOME SECTION
+         ===================================== -->
+
+    <section class="dash-hero">
+
+        <div class="dash-hero-content">
+
+            <div class="dash-eyebrow">
+                Administration Overview
+            </div>
+
+            <h1>
+                Welcome Back,<br>
+                <span>Administrator</span>
+            </h1>
+
+            <p class="dash-hero-description">
+                Manage your Smart Attendance System, monitor academic
+                activities, review attendance records, and keep
+                everything running smoothly from your centralized
+                administration workspace.
+            </p>
+
+        </div>
+
+        <div class="dash-date-card">
+
+            <div class="dash-date-row">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M8 3v4m8-4v4M3 10h18"/>
+                </svg>
+
+                <span id="dashboardDate">Loading...</span>
+            </div>
+
+            <div class="dash-date-row">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 2"/>
+                </svg>
+
+                <span id="dashboardTime">Loading...</span>
+            </div>
+
+            <div class="dash-date-footer">
+                Your Administration Workspace
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         SYSTEM STATISTICS
+         ===================================== -->
+
+    <section class="dash-stats" aria-label="System statistics">
+
+        <!-- TOTAL USERS -->
+        <article class="dash-stat users">
+
+            <div class="dash-stat-top">
+
+                <div class="dash-stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <circle cx="9" cy="8" r="3"/>
+                        <path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <div class="dash-stat-label">Total Users</div>
+                    <div class="dash-stat-value">{{ total_users }}</div>
+                </div>
+
+            </div>
+
+            <div class="dash-stat-bottom">
+                <strong>{{ total_students }}</strong> Students
+                &nbsp; | &nbsp;
+                <strong>{{ total_teachers }}</strong> Teachers
+            </div>
+
+        </article>
+
+
+        <!-- TOTAL SUBJECTS -->
+        <article class="dash-stat subjects">
+
+            <div class="dash-stat-top">
+
+                <div class="dash-stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 6C9 4 6 4 3 5v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Zm0 0v14"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <div class="dash-stat-label">Total Subjects</div>
+                    <div class="dash-stat-value">{{ total_subjects }}</div>
+                </div>
+
+            </div>
+
+            <div class="dash-stat-bottom">
+                Academic subjects registered in the system
+            </div>
+
+        </article>
+
+
+        <!-- TOTAL SESSIONS -->
+        <article class="dash-stat sessions">
+
+            <div class="dash-stat-top">
+
+                <div class="dash-stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M8 3v4m8-4v4M3 10h18"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <div class="dash-stat-label">Total Sessions</div>
+                    <div class="dash-stat-value">{{ total_sessions }}</div>
+                </div>
+
+            </div>
+
+            <div class="dash-stat-bottom">
+                Scheduled class sessions
+            </div>
+
+        </article>
+
+
+        <!-- VERIFIED ATTENDANCE -->
+        <article class="dash-stat attendance">
+
+            <div class="dash-stat-top">
+
+                <div class="dash-stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 20V12m5 8V5m5 15v-9m5 9V8"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <div class="dash-stat-label">Verified Attendance</div>
+                    <div class="dash-stat-value">{{ total_attendance }}</div>
+                </div>
+
+            </div>
+
+            <div class="dash-stat-bottom">
+                Verified student attendance records
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =====================================
+         QUICK ACCESS
+         ===================================== -->
+
+    <div class="dash-section-heading">
+        <div>
+            <h2>Quick Access</h2>
+            <p>Manage your most important administrative tasks</p>
+        </div>
+    </div>
+
+    <section class="dash-shortcuts" aria-label="Quick access">
+
+        <a href="{{ url_for('admin.list_users') }}"
+           class="dash-shortcut">
+
+            <div class="dash-shortcut-icon">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <circle cx="9" cy="8" r="3"/>
+                    <path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/>
+                </svg>
+            </div>
+
+            <div>
+                <strong>Manage Users</strong>
+                <small>View and manage accounts</small>
+            </div>
+
+        </a>
+
+
+        <a href="{{ url_for('admin.create_subject') }}"
+           class="dash-shortcut">
+
+            <div class="dash-shortcut-icon">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 6C9 4 6 4 3 5v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Zm0 0v14"/>
+                </svg>
+            </div>
+
+            <div>
+                <strong>Create Subject</strong>
+                <small>Assign academic subjects</small>
+            </div>
+
+        </a>
+
+
+        <a href="{{ url_for('admin.create_session') }}"
+           class="dash-shortcut">
+
+            <div class="dash-shortcut-icon">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M8 3v4m8-4v4M3 10h18"/>
+                </svg>
+            </div>
+
+            <div>
+                <strong>Create Session</strong>
+                <small>Schedule a new class</small>
+            </div>
+
+        </a>
+
+
+        <a href="{{ url_for('admin.audit_logs') }}"
+           class="dash-shortcut">
+
+            <div class="dash-shortcut-icon">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <path d="M8 3h8l4 4v14H4V3h4Zm8 0v5h4M8 12h8M8 16h8"/>
+                </svg>
+            </div>
+
+            <div>
+                <strong>Audit Logs</strong>
+                <small>Review system activities</small>
+            </div>
+
+        </a>
+
+    </section>
+
+
+    <!-- =====================================
+         SCHEDULED JOBS
+         ===================================== -->
+
+    <div class="dash-section-heading" id="sa-jobs">
+        <div>
+            <h2>Scheduled Jobs</h2>
+            <p>Manage automated reports and system email testing</p>
+        </div>
+    </div>
+
+    <section class="dash-jobs">
+
+        <!-- WEEKLY REPORTS -->
+
+        <form
+            method="POST"
+            action="{{ url_for('admin.trigger_job') }}"
+            class="dash-job"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <input
+                type="hidden"
+                name="job_type"
+                value="weekly_reports"
+            >
+
+            <div class="dash-job-header">
+
+                <div class="dash-job-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <path d="M8 3h8l4 4v14H4V3h4Zm8 0v5h4M8 12h8M8 16h8"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h3>Weekly Attendance Reports</h3>
+
+                    <p class="dash-job-description">
+                        Send weekly attendance reports to all students
+                        and families.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="dash-job-controls">
+
+                <div class="dash-schedule">
+                    <div class="dash-schedule-label">
+                        Scheduled Time
+                    </div>
+
+                    <div class="dash-schedule-value">
+                        Every Monday at 07:00
+                    </div>
+                </div>
+
+                <button type="submit" class="dash-button">
+                    Trigger Now
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- TEST EMAIL -->
+
+        <form
+            method="POST"
+            action="{{ url_for('admin.trigger_job') }}"
+            class="dash-job"
+            id="sa-email"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <input
+                type="hidden"
+                name="job_type"
+                value="test_email"
+            >
+
+            <div class="dash-job-header">
+
+                <div class="dash-job-icon blue">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="5" width="18" height="14" rx="2"/>
+                        <path d="m3 7 9 6 9-6"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h3>Test Email Configuration</h3>
+
+                    <p class="dash-job-description">
+                        Send a test email to verify your configured
+                        SMTP settings.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="dash-job-controls">
+
+                <input
+                    type="email"
+                    name="test_email"
+                    class="dash-email-input"
+                    placeholder="recipient@example.com"
+                    aria-label="Test email recipient"
+                    required
+                >
+
+                <button type="submit" class="dash-button">
+                    Send Test
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================
+         RECENT ACTIVITY
+         ===================================== -->
+
+    <div class="dash-section-heading">
+        <div>
+            <h2>System Monitoring</h2>
+            <p>Track recent administrative activities</p>
+        </div>
+    </div>
+
+    <section class="dash-activity" id="sa-activity">
+
+        <div class="dash-activity-header">
+
+            <div class="dash-activity-title">
+
+                <div class="dash-activity-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8">
+                        <path d="M3 12h4l3-7 4 14 3-7h4"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h2>Recent Activity</h2>
+                    <p class="dash-activity-subtitle">
+                        Latest system events and administrative actions
+                    </p>
+                </div>
+
+            </div>
+
+            <a href="{{ url_for('admin.audit_logs') }}"
+               class="dash-outline-button">
+                View All Logs →
+            </a>
+
+        </div>
+
+
+        {% if recent_logs %}
+
+            <div class="dash-table-wrapper">
+
+                <table class="dash-table">
+
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>User</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in recent_logs %}
+
+                            <tr>
+
+                                <td>
+                                    {{ log.timestamp.strftime('%I:%M %p') }}
+                                </td>
+
+                                <td class="dash-table-action">
+                                    {{ log.action }}
+                                </td>
+
+                                <td>
+                                    {% if log.user_id %}
+
+                                        <span class="dash-user-badge">
+                                            User #{{ log.user_id }}
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="dash-user-badge system">
+                                            System
+                                        </span>
+
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if log.details %}
+                                        {{ log.details[:100] }}{% if log.details|length > 100 %}...{% endif %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="dash-empty">
+                <strong>No Activity Logs Yet</strong>
+                Recent system events will appear here once
+                activity is recorded.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer class="dash-footer">
+        <span>Smart Attendance System</span>
+        <span>Administration Portal</span>
+    </footer>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+(function () {
+    const dateElement = document.getElementById("dashboardDate");
+    const timeElement = document.getElementById("dashboardTime");
+
+    function updateDashboardClock() {
+        const now = new Date();
+
+        if (dateElement) {
+            dateElement.textContent = now.toLocaleDateString(
+                undefined,
+                {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            );
+        }
+
+        if (timeElement) {
+            timeElement.textContent = now.toLocaleTimeString(
+                undefined,
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+        }
+    }
+
+    updateDashboardClock();
+    setInterval(updateDashboardClock, 60000);
+})();
+</script>
+{% endblock %}

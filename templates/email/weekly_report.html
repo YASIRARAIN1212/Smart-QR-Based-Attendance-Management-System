@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Attendance Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            margin: -30px -30px 20px -30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .stats {
+            display: table;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .stat-item {
+            display: table-cell;
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .stat-item + .stat-item {
+            border-left: 2px solid #fff;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .percentage {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .percentage.excellent { color: #28a745; }
+        .percentage.good { color: #5cb85c; }
+        .percentage.warning { color: #ffc107; }
+        .percentage.danger { color: #dc3545; }
+        .missed-sessions {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+        .missed-sessions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .session-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .session-item:last-child {
+            border-bottom: none;
+        }
+        .recommendation {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .recommendation h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Weekly Attendance Report</h1>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">{{ week_start }} - {{ week_end }}</p>
+        </div>
+        
+        <h2>Hello, {{ student_name }}!</h2>
+        <p>Here is your attendance summary for the past week:</p>
+        
+        <div class="percentage {% if percentage >= 90 %}excellent{% elif percentage >= 75 %}good{% elif percentage >= 60 %}warning{% else %}danger{% endif %}">
+            {{ "%.1f"|format(percentage) }}%
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ total_sessions }}</div>
+                <div class="stat-label">Total Classes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color: #28a745;">{{ attended }}</div>
+                <div class="stat-label">Attended</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color: #dc3545;">{{ missed }}</div>
+                <div class="stat-label">Missed</div>
+            </div>
+        </div>
+        
+        {% if missed_sessions %}
+        <div class="missed-sessions">
+            <h3>⚠️ Missed Sessions</h3>
+            {% for session in missed_sessions %}
+            <div class="session-item">
+                <strong>{{ session.subject.name }}</strong> ({{ session.subject.code }})<br>
+                <small>{{ session.start_time.strftime('%A, %B %d at %I:%M %p') }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="recommendation">
+            <h3>💡 Recommendation</h3>
+            <p style="margin: 0;">{{ recommendation }}</p>
+        </div>
+        
+        <p style="margin-top: 30px;">
+            <strong>Student ID:</strong> {{ student_id }}<br>
+            <strong>Report Generated:</strong> {{ week_end }}
+        </p>
+        
+        <div class="footer">
+            <p>This is an automated report from the Smart Attendance System.</p>
+            <p>&copy; {{ year }} Smart Attendance System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

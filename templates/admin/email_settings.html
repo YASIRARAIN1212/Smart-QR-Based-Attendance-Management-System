@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Email Settings{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-5 py-8 space-y-6"><h1 class="text-3xl font-bold text-slate-900">Email Settings</h1>
+<p class="text-slate-600">SMTP is configured through server environment variables for security. Passwords are never shown in this dashboard.</p>
+<div class="bg-white border rounded-2xl p-6 space-y-2"><h2 class="text-xl font-semibold">Current SMTP Configuration</h2>
+<p><strong>Status:</strong> {% if configured %}<span class="text-green-700">Credentials configured</span>{% else %}<span class="text-amber-700">Credentials missing</span>{% endif %}</p>
+<p><strong>Server:</strong> {{ smtp_host }}</p><p><strong>Port:</strong> {{ smtp_port }}</p><p><strong>Username:</strong> {{ smtp_user or 'Not set' }}</p><p><strong>Sender:</strong> {{ sender }}</p>
+</div>
+<div class="bg-white border rounded-2xl p-6 space-y-4"><h2 class="text-xl font-semibold">Send Test Email</h2><form method="POST" class="space-y-3"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="block font-medium" for="test_email">Recipient email</label><input id="test_email" type="email" name="test_email" required maxlength="254" placeholder="you@example.com" class="w-full border rounded-lg p-3"><button type="submit" class="bg-indigo-600 text-white rounded-lg px-5 py-3">Send Test Email</button></form></div>
+<div class="bg-white border rounded-2xl p-6 space-y-3"><h2 class="text-xl font-semibold">Set Up SMTP</h2><p>In your PowerShell terminal, set these variables before running the Flask app:</p>
+<pre class="overflow-x-auto bg-slate-900 text-white p-4 rounded-lg text-sm">$env:SMTP_HOST="smtp.gmail.com"
+$env:SMTP_PORT="587"
+$env:SMTP_USER="your-email@gmail.com"
+$env:SMTP_PASSWORD="your-app-password"
+$env:MAIL_DEFAULT_SENDER="your-email@gmail.com"
+python app.py</pre>
+<p class="text-sm text-slate-600">For Gmail, use an app password where supported, not your account password. Restart the app after changing settings. SMTP requires a working internet connection.</p></div></div>
+{% endblock %}
