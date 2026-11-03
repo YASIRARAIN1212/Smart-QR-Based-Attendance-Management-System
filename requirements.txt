@@ -22,3 +22,4 @@ Werkzeug
 WTForms
 python-docx
 openpyxl
+psycopg[binary]
