@@ -1,4 +1,4 @@
-
+from extensions import csrf
 import base64
 import binascii
 
@@ -185,6 +185,7 @@ def scan_qr():
     '/attendance/mark',
     methods=['POST']
 )
+@csrf.exempt
 @role_required('undergraduate', 'postgraduate')
 def mark_attendance():
 
