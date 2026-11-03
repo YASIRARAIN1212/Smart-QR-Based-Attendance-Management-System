@@ -803,17 +803,204 @@ def session_attendance(session_id):
                            absent_count=total - verified, attendance_percent=round(100 * verified / total, 1) if total else 0)
 
 
+
 @admin_bp.route('/enrollments')
 @role_required('admin')
 def enrollments():
+
     subject_id = request.args.get('subject_id', type=int)
-    subjects = Subject.query.filter_by(is_active=True).order_by(Subject.name).all()
+
+    subjects = (
+        Subject.query
+        .filter_by(is_active=True)
+        .order_by(Subject.name)
+        .all()
+    )
+
     if not subject_id and subjects:
         subject_id = subjects[0].id
-    roster = (db.session.query(User).join(Enrollment, Enrollment.student_id == User.id)
-              .filter(Enrollment.subject_id == subject_id).order_by(User.student_id).all()) if subject_id else []
-    sessions = Session.query.filter_by(subject_id=subject_id, is_active=True).order_by(Session.start_time.desc()).all() if subject_id else []
-    verified_by_session = {ss.id: {r.student_id for r in Attendance.query.filter_by(session_id=ss.id, verification_status='VERIFIED').all()} for ss in sessions}
-    percentages = {u.id: round(100 * sum(u.id in ids for ids in verified_by_session.values()) / len(sessions), 1) if sessions else 0 for u in roster}
-    return render_template('admin/enrollments.html', subjects=subjects, subject_id=subject_id, roster=roster,
-                           sessions=sessions, percentages=percentages)
+
+    selected_subject = Subject.query.filter_by(
+        id=subject_id,
+        is_active=True
+    ).first() if subject_id else None
+
+    if subject_id and not selected_subject:
+        subject_id = subjects[0].id if subjects else None
+
+    # Students already enrolled in selected subject
+    roster = (
+        db.session.query(User)
+        .join(Enrollment, Enrollment.student_id == User.id)
+        .filter(
+            Enrollment.subject_id == subject_id,
+            User.is_active.is_(True)
+        )
+        .order_by(User.student_id)
+        .all()
+    ) if subject_id else []
+
+    # Students not yet enrolled in selected subject
+    available_students = (
+        User.query
+        .filter(
+            User.role.in_(['undergraduate', 'postgraduate']),
+            User.is_active.is_(True),
+            ~User.id.in_(
+                db.session.query(Enrollment.student_id)
+                .filter(Enrollment.subject_id == subject_id)
+            )
+        )
+        .order_by(User.full_name)
+        .all()
+    ) if subject_id else []
+
+    # Active class sessions
+    sessions = (
+        Session.query
+        .filter_by(subject_id=subject_id, is_active=True)
+        .order_by(Session.start_time.desc())
+        .all()
+    ) if subject_id else []
+
+    # Calculate verified attendance percentages
+    verified_by_session = {
+        ss.id: {
+            r.student_id
+            for r in Attendance.query.filter_by(
+                session_id=ss.id,
+                verification_status='VERIFIED'
+            ).all()
+        }
+        for ss in sessions
+    }
+
+    percentages = {
+        u.id: round(
+            100 * sum(
+                u.id in ids
+                for ids in verified_by_session.values()
+            ) / len(sessions), 1
+        ) if sessions else 0
+        for u in roster
+    }
+
+    return render_template(
+        'admin/enrollments.html',
+        subjects=subjects,
+        subject_id=subject_id,
+        roster=roster,
+        available_students=available_students,
+        sessions=sessions,
+        percentages=percentages
+    )
+
+@admin_bp.route('/enrollments/assign', methods=['POST'])
+@role_required('admin')
+def assign_student():
+    admin_user = get_current_user()
+    assert admin_user is not None
+
+    student_id = request.form.get('student_id', type=int)
+    subject_id = request.form.get('subject_id', type=int)
+
+    student = User.query.filter(
+        User.id == student_id,
+        User.role.in_(['undergraduate', 'postgraduate']),
+        User.is_active.is_(True)
+    ).first() if student_id else None
+
+    subject = Subject.query.filter_by(
+        id=subject_id,
+        is_active=True
+    ).first() if subject_id else None
+
+    if not student or not subject:
+        flash('Please select a valid student and subject.', 'danger')
+        return redirect(url_for('admin.enrollments'))
+
+    existing = Enrollment.query.filter_by(
+        student_id=student.id,
+        subject_id=subject.id
+    ).first()
+
+    if existing:
+        flash('This student is already enrolled in this subject.', 'warning')
+    else:
+        try:
+            enrollment = Enrollment(
+                student_id=student.id,
+                subject_id=subject.id
+            )
+
+            db.session.add(enrollment)
+            db.session.flush()
+
+            log_audit(
+                user_id=admin_user.id,
+                action='STUDENT_ENROLLED',
+                entity_type='Enrollment',
+                entity_id=enrollment.id,
+                details=f'{student.full_name} assigned to {subject.name}',
+                ip_address=request.remote_addr
+            )
+
+            db.session.commit()
+
+            flash(
+                f'{student.full_name} successfully assigned to {subject.name}.',
+                'success'
+            )
+
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception('Student enrollment failed')
+            flash('Could not assign student. Please try again.', 'danger')
+
+    return redirect(url_for(
+        'admin.enrollments',
+        subject_id=subject_id
+    ))
+
+
+@admin_bp.route(
+    '/enrollments/<int:enrollment_id>/remove',
+    methods=['POST']
+)
+@role_required('admin')
+def remove_enrollment(enrollment_id):
+
+    admin_user = get_current_user()
+    assert admin_user is not None
+
+    enrollment = Enrollment.query.get_or_404(enrollment_id)
+    subject_id = enrollment.subject_id
+
+    try:
+        student_name = enrollment.student.full_name
+        subject_name = enrollment.subject.name
+
+        db.session.delete(enrollment)
+
+        log_audit(
+            user_id=admin_user.id,
+            action='STUDENT_UNENROLLED',
+            entity_type='Enrollment',
+            entity_id=enrollment_id,
+            details=f'{student_name} removed from {subject_name}',
+            ip_address=request.remote_addr
+        )
+
+        db.session.commit()
+
+        flash('Student removed from subject successfully.', 'success')
+
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Student unenrollment failed')
+        flash('Could not remove student.', 'danger')
+
+    return redirect(url_for(
+        'admin.enrollments',
+        subject_id=subject_id
+    ))
