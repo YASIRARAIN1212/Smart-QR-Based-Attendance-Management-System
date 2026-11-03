@@ -134,8 +134,24 @@ function onScanSuccess(decodedText, decodedResult) {
                     longitude: longitude
                 })
             })
-            .then(response => response.json())
-            .then(data => {
+           .then(async response => {
+    const responseText = await response.text();
+
+    console.log("HTTP STATUS:", response.status);
+    console.log("RESPONSE URL:", response.url);
+    console.log("SERVER RESPONSE:", responseText);
+
+    try {
+        return JSON.parse(responseText);
+    } catch (error) {
+        throw new Error(
+            "Server returned HTML instead of JSON. HTTP Status: " +
+            response.status +
+            ". Check browser console for server response."
+        );
+    }
+})
+.then(data => {
                 if (data.success) {
                     showStatus('✓ ' + data.message, true);
                     setTimeout(() => {
