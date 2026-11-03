@@ -94,11 +94,34 @@ function onScanSuccess(decodedText, decodedResult) {
     }
     
     navigator.geolocation.getCurrentPosition(
-        function(position) {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-            
-            showStatus('Location obtained! Marking attendance...', true);
+       function(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    const accuracy = position.coords.accuracy;
+
+    console.log("PHONE GPS LATITUDE:", latitude);
+    console.log("PHONE GPS LONGITUDE:", longitude);
+    console.log("PHONE GPS ACCURACY:", accuracy, "meters");
+
+    if (accuracy > 100) {
+        showStatus(
+            'GPS accuracy is too low (' +
+            Math.round(accuracy) +
+            'm). Please move outdoors, enable precise location, and scan again.',
+            false
+        );
+
+        isProcessing = false;
+        html5QrCode.resume();
+        return;
+    }
+
+    showStatus(
+        'GPS obtained. Accuracy: ' +
+        Math.round(accuracy) +
+        'm. Checking attendance...',
+        true
+    );
             
             fetch('{{ url_for("student.mark_attendance") }}', {
                 method: 'POST',
@@ -154,10 +177,10 @@ function onScanSuccess(decodedText, decodedResult) {
             html5QrCode.resume();
         },
         {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
+    enableHighAccuracy: true,
+    timeout: 20000,
+    maximumAge: 0
+}
     );
 }
 
