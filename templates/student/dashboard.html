@@ -336,3 +336,19 @@
 </div>
 
 {% endblock %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Automatically refresh student attendance every 15 seconds.
+    // The existing login session and database records remain unchanged.
+
+    setInterval(function () {
+
+        if (!document.hidden) {
+            window.location.reload();
+        }
+
+    }, 15000);
+
+});
+</script>
