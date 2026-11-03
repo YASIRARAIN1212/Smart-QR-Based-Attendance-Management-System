@@ -1,4 +1,3 @@
-
 from flask import (
     Blueprint, render_template, request, jsonify,
     session, flash, redirect, url_for, send_file,
@@ -344,7 +343,6 @@ def upload_attendance():
 
     return redirect(url_for('teacher.upload_attendance'))
 
-
 # =====================================================
 # VIEW SESSION
 # =====================================================
@@ -661,7 +659,6 @@ def export_csv(session_id):
         download_name=filename
     )
 
-
 # =====================================================
 # CREATE SESSION
 # =====================================================
@@ -738,8 +735,17 @@ def create_session():
                 '%Y-%m-%dT%H:%M'
             )
 
-            start_time = pytz.UTC.localize(start_time)
-            end_time = pytz.UTC.localize(end_time)
+            # Form datetime-local values are Pakistan local time (UTC+5).
+            # Convert them to UTC before storing in the database.
+            pakistan_tz = pytz.timezone('Asia/Karachi')
+
+            start_time = pakistan_tz.localize(
+                start_time
+            ).astimezone(pytz.UTC)
+
+            end_time = pakistan_tz.localize(
+                end_time
+            ).astimezone(pytz.UTC)
 
             if end_time <= start_time:
 
