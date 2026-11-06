@@ -116,6 +116,10 @@ def qr_attendance():
 # STUDENT RECORDS
 # =====================================================
 
+# =====================================================
+# STUDENT RECORDS
+# =====================================================
+
 @teacher_bp.route('/student-records')
 @role_required('employee')
 def student_records():
@@ -128,12 +132,37 @@ def student_records():
         is_active=True
     ).all()
 
+    subject_records = []
+
+    for subject in subjects:
+
+        students = (
+            db.session.query(User)
+            .join(
+                Enrollment,
+                Enrollment.student_id == User.id
+            )
+            .filter(
+                Enrollment.subject_id == subject.id
+            )
+            .order_by(User.full_name)
+            .all()
+        )
+
+        students = [
+            student for student in students
+            if student.is_student()
+        ]
+
+        subject_records.append({
+            'subject': subject,
+            'students': students
+        })
+
     return render_template(
-        'teacher/dashboard.html',
+        'teacher/student_records.html',
         user=user,
-        subjects=subjects,
-        today_sessions=[],
-        upcoming_sessions=[]
+        subject_records=subject_records
     )
 
 

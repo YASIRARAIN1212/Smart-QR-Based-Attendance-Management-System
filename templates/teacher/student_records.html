@@ -1,0 +1,162 @@
+
+{% extends "base.html" %}
+
+{% block title %}Student Records | CampusAttend{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Page Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">
+                Student Records
+            </h1>
+            <p class="mt-2 text-slate-500">
+                View students enrolled in your assigned subjects.
+            </p>
+        </div>
+
+        <a href="{{ url_for('teacher.dashboard') }}"
+           class="rounded-xl bg-slate-800 px-5 py-3 font-semibold text-white hover:bg-slate-700">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Subject Summary -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+
+        <div class="rounded-2xl border bg-white p-6 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">
+                Assigned Subjects
+            </p>
+            <p class="mt-2 text-3xl font-extrabold text-indigo-600">
+                {{ subject_records|length }}
+            </p>
+        </div>
+
+        <div class="rounded-2xl border bg-white p-6 shadow-sm">
+            <p class="text-sm font-medium text-slate-500">
+                Total Enrolled Students
+            </p>
+            <p class="mt-2 text-3xl font-extrabold text-emerald-600">
+                {{ subject_records|sum(attribute='students|length') if false else subject_records|map(attribute='students')|map('length')|sum }}
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Subject-wise Student Records -->
+    {% if subject_records %}
+
+        {% for item in subject_records %}
+
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm mb-7 overflow-hidden">
+
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b bg-slate-50 px-6 py-5">
+
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">
+                        {{ item.subject.name }}
+                    </h2>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Subject Code: {{ item.subject.code }}
+                    </p>
+                </div>
+
+                <span class="rounded-full bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700">
+                    {{ item.students|length }} Students
+                </span>
+
+            </div>
+
+            {% if item.students %}
+
+            <div class="overflow-x-auto">
+
+                <table class="min-w-full text-sm text-left">
+
+                    <thead class="bg-white text-slate-500 uppercase">
+                        <tr>
+                            <th class="px-6 py-4">#</th>
+                            <th class="px-6 py-4">Student Name</th>
+                            <th class="px-6 py-4">Student ID</th>
+                            <th class="px-6 py-4">Email</th>
+                            <th class="px-6 py-4">Department</th>
+                            <th class="px-6 py-4">Academic Year</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100">
+
+                        {% for student in item.students %}
+
+                        <tr class="hover:bg-slate-50">
+
+                            <td class="px-6 py-4 text-slate-500">
+                                {{ loop.index }}
+                            </td>
+
+                            <td class="px-6 py-4 font-semibold text-slate-900">
+                                {{ student.full_name }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {{ student.student_id or 'N/A' }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {{ student.email }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {{ student.department or 'N/A' }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {{ student.year or 'N/A' }}
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="p-8 text-center text-slate-500">
+                No students enrolled in this subject yet.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="rounded-2xl border bg-white p-12 text-center">
+
+            <h2 class="text-xl font-bold text-slate-800">
+                No Assigned Subjects
+            </h2>
+
+            <p class="mt-2 text-slate-500">
+                You currently have no active subjects assigned.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
