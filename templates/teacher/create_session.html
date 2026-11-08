@@ -4,8 +4,19 @@
 {% block title %}Create Session - Teacher Portal{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
+
+<!-- Custom Date Time Picker -->
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <style>
     #map {
@@ -27,6 +38,34 @@
     .leaflet-container {
         font-family: inherit;
     }
+
+    /* Calendar OK Button */
+    .flatpickr-confirm-btn {
+        display: block;
+        width: calc(100% - 20px);
+        margin: 10px;
+        padding: 11px;
+        background: #2563eb;
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .flatpickr-confirm-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .flatpickr-confirm-btn:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+    }
+
+    .flatpickr-calendar {
+        z-index: 9999 !important;
+    }
 </style>
 {% endblock %}
 
@@ -43,7 +82,8 @@
 
         <form method="POST" id="sessionForm">
 
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="csrf_token"
+                   value="{{ csrf_token() }}"/>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -54,7 +94,7 @@
                     </label>
 
                     <select name="subject_id" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
 
                         <option value="">Select Subject</option>
 
@@ -68,77 +108,49 @@
                 </div>
 
 
-                <!-- Start Time -->
+                <!-- START TIME -->
                 <div>
-
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Start Time <span class="text-red-500">*</span>
                     </label>
 
-                    <input type="datetime-local"
+                    <input type="text"
                            name="start_time"
                            id="start_time"
                            required
+                           placeholder="Select start date and time"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
 
-                    <div class="mt-2 flex flex-wrap items-center gap-3">
-
-                        <button type="button"
-                                onclick="confirmSessionTime('start_time')"
-                                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
-
-                            OK - Confirm Start Time
-
-                        </button>
-
-                        <span id="start_time_status"
-                              class="text-sm text-gray-500"
-                              aria-live="polite">
-                            Not confirmed
-                        </span>
-
-                    </div>
-
+                    <p id="startStatus"
+                       class="text-sm text-gray-500 mt-2">
+                        Select date and time, then press OK inside the calendar.
+                    </p>
                 </div>
 
 
-                <!-- End Time -->
+                <!-- END TIME -->
                 <div>
-
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         End Time <span class="text-red-500">*</span>
                     </label>
 
-                    <input type="datetime-local"
+                    <input type="text"
                            name="end_time"
                            id="end_time"
                            required
+                           placeholder="Select end date and time"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
 
-                    <div class="mt-2 flex flex-wrap items-center gap-3">
-
-                        <button type="button"
-                                onclick="confirmSessionTime('end_time')"
-                                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
-
-                            OK - Confirm End Time
-
-                        </button>
-
-                        <span id="end_time_status"
-                              class="text-sm text-gray-500"
-                              aria-live="polite">
-                            Not confirmed
-                        </span>
-
-                    </div>
-
+                    <p id="endStatus"
+                       class="text-sm text-gray-500 mt-2">
+                        Select date and time, then press OK inside the calendar.
+                    </p>
                 </div>
 
             </div>
 
 
-            <!-- Location Map Section -->
+            <!-- LOCATION MAP SECTION -->
             <div class="mt-6 border-t pt-6">
 
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -160,15 +172,13 @@
                     or use the button above to use your current location.
                 </p>
 
-                <!-- Interactive Map -->
                 <div id="map" class="shadow-md"></div>
 
 
-                <!-- Coordinates Display -->
+                <!-- Coordinates -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
 
                     <div>
-
                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                             Latitude
                         </label>
@@ -181,12 +191,10 @@
                                class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50"
                                placeholder="Click map to select"
                                readonly>
-
                     </div>
 
 
                     <div>
-
                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                             Longitude
                         </label>
@@ -199,12 +207,10 @@
                                class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50"
                                placeholder="Click map to select"
                                readonly>
-
                     </div>
 
 
                     <div class="sm:col-span-2 lg:col-span-1">
-
                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                             Location Name (Optional)
                         </label>
@@ -214,15 +220,13 @@
                                id="location_name"
                                class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                placeholder="e.g., Room 101">
-
                     </div>
 
                 </div>
-
             </div>
 
 
-            <!-- Compensation Session Options -->
+            <!-- COMPENSATION SESSION -->
             <div class="mt-6 border-t pt-6">
 
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -255,21 +259,19 @@
                     </label>
 
                     <select name="compensates_session_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
 
                         <option value="">-- Select Session --</option>
 
                         {% for session in past_sessions %}
 
                         <option value="{{ session.id }}">
-
                             {{ session.subject.code }} -
                             {{ session.start_time.strftime('%b %d, %Y %H:%M') }}
 
                             {% if session.location_name %}
                                 ({{ session.location_name }})
                             {% endif %}
-
                         </option>
 
                         {% endfor %}
@@ -281,11 +283,10 @@
                     </p>
 
                 </div>
-
             </div>
 
 
-            <!-- Notes -->
+            <!-- NOTES -->
             <div class="mt-6">
 
                 <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -300,11 +301,11 @@
             </div>
 
 
-            <!-- Submit Button -->
+            <!-- SUBMIT -->
             <div class="mt-6 flex gap-4">
 
                 <button type="submit"
-                        class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
 
                     Create Session
 
@@ -322,19 +323,14 @@
         </form>
 
     </div>
-
 </div>
 
 
 <script>
 
-let map;
-let marker;
-
-
-// ============================================
-// DATE AND TIME CONFIRMATION
-// ============================================
+// ==================================================
+// DATE TIME PICKER WITH INTERNAL OK BUTTON
+// ==================================================
 
 const confirmedSessionTimes = {
     start_time: false,
@@ -342,161 +338,205 @@ const confirmedSessionTimes = {
 };
 
 
-function confirmSessionTime(fieldName) {
-
-    const input = document.getElementById(fieldName);
+function updateTimeStatus(fieldId, message, success) {
 
     const status = document.getElementById(
-        fieldName + '_status'
+        fieldId === 'start_time' ? 'startStatus' : 'endStatus'
     );
 
-    if (!input.value) {
+    status.textContent = message;
 
-        status.textContent = 'Please select date and time first.';
-        status.className = 'text-sm text-red-600';
+    status.className = success
+        ? 'text-sm text-green-700 font-semibold mt-2'
+        : 'text-sm text-gray-500 mt-2';
+}
 
-        return;
-    }
 
-    const startInput = document.getElementById('start_time');
-    const endInput = document.getElementById('end_time');
+function createDateTimePicker(fieldId) {
 
-    if (startInput.value && endInput.value) {
+    return flatpickr('#' + fieldId, {
 
-        const start = new Date(startInput.value);
-        const end = new Date(endInput.value);
+        enableTime: true,
 
-        if (fieldName === 'start_time' && start >= end) {
+        dateFormat: 'Y-m-d\\TH:i',
 
-            alert('Start time must be before end time.');
-            return;
+        altInput: true,
+
+        altFormat: 'm/d/Y h:i K',
+
+        altInputClass: 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500',
+
+        time_24hr: false,
+
+        minuteIncrement: 1,
+
+        allowInput: false,
+
+        onReady: function(selectedDates, dateStr, instance) {
+
+            const okButton = document.createElement('button');
+
+            okButton.type = 'button';
+
+            okButton.textContent = 'OK';
+
+            okButton.className = 'flatpickr-confirm-btn';
+
+            okButton.addEventListener('click', function() {
+
+                if (!instance.selectedDates.length || !instance.input.value) {
+
+                    alert('Please select a date and time first.');
+
+                    return;
+                }
+
+                const startValue =
+                    document.getElementById('start_time').value;
+
+                const endValue =
+                    document.getElementById('end_time').value;
+
+                const selectedDate = instance.selectedDates[0];
+
+                if (fieldId === 'start_time' && endValue) {
+
+                    if (selectedDate >= new Date(endValue)) {
+
+                        alert('Start time must be before end time.');
+
+                        return;
+                    }
+                }
+
+                if (fieldId === 'end_time' && startValue) {
+
+                    if (selectedDate <= new Date(startValue)) {
+
+                        alert('End time must be after start time.');
+
+                        return;
+                    }
+                }
+
+                confirmedSessionTimes[fieldId] = true;
+
+                updateTimeStatus(
+                    fieldId,
+                    '✓ Date and time confirmed',
+                    true
+                );
+
+                instance.close();
+
+            });
+
+            instance.calendarContainer.appendChild(okButton);
+
+        },
+
+        onChange: function() {
+
+            confirmedSessionTimes[fieldId] = false;
+
+            updateTimeStatus(
+                fieldId,
+                'Press OK inside the calendar to confirm.',
+                false
+            );
 
         }
 
-        if (fieldName === 'end_time' && end <= start) {
-
-            alert('End time must be after start time.');
-            return;
-
-        }
-
-    }
-
-    confirmedSessionTimes[fieldName] = true;
-
-    status.textContent = '✓ Confirmed';
-
-    status.className =
-        'text-sm font-semibold text-green-700';
+    });
 
 }
 
 
-// Reset confirmation when date/time changes
-
 document.addEventListener('DOMContentLoaded', function() {
 
-    ['start_time', 'end_time'].forEach(function(fieldName) {
+    if (typeof flatpickr === 'undefined') {
 
-        const input = document.getElementById(fieldName);
+        alert('Date picker failed to load. Please refresh the page.');
 
-        input.addEventListener('input', function() {
+        return;
+    }
 
-            confirmedSessionTimes[fieldName] = false;
+    createDateTimePicker('start_time');
 
-            const status = document.getElementById(
-                fieldName + '_status'
-            );
-
-            status.textContent = 'Not confirmed';
-
-            status.className = 'text-sm text-gray-500';
-
-        });
-
-        input.addEventListener('change', function() {
-
-            confirmedSessionTimes[fieldName] = false;
-
-            const status = document.getElementById(
-                fieldName + '_status'
-            );
-
-            status.textContent = 'Not confirmed';
-
-            status.className = 'text-sm text-gray-500';
-
-        });
-
-    });
-
-
-    // Validate before submitting
-
-    document.getElementById('sessionForm')
-        .addEventListener('submit', function(event) {
-
-            const startInput = document.getElementById('start_time');
-            const endInput = document.getElementById('end_time');
-
-            if (!startInput.value || !endInput.value) {
-
-                event.preventDefault();
-
-                alert('Please select both start and end date/time.');
-
-                return;
-
-            }
-
-            if (
-                !confirmedSessionTimes.start_time ||
-                !confirmedSessionTimes.end_time
-            ) {
-
-                event.preventDefault();
-
-                alert('Please press OK to confirm both Start Time and End Time.');
-
-                return;
-
-            }
-
-            if (
-                new Date(endInput.value) <=
-                new Date(startInput.value)
-            ) {
-
-                event.preventDefault();
-
-                alert('End time must be after start time.');
-
-            }
-
-        });
+    createDateTimePicker('end_time');
 
 });
 
 
-// ============================================
+// ==================================================
+// FORM VALIDATION
+// ==================================================
+
+document.getElementById('sessionForm').addEventListener('submit', function(e) {
+
+    const start = document.getElementById('start_time').value;
+
+    const end = document.getElementById('end_time').value;
+
+    if (!start || !end) {
+
+        e.preventDefault();
+
+        alert('Please select both start and end date/time.');
+
+        return;
+    }
+
+    if (!confirmedSessionTimes.start_time ||
+        !confirmedSessionTimes.end_time) {
+
+        e.preventDefault();
+
+        alert('Please press the OK button inside both date-time calendars.');
+
+        return;
+    }
+
+    if (new Date(end) <= new Date(start)) {
+
+        e.preventDefault();
+
+        alert('End time must be after start time.');
+
+    }
+
+});
+
+
+// ==================================================
 // MAP INITIALIZATION
-// ============================================
+// ==================================================
+
+let map;
+let marker;
 
 document.addEventListener('DOMContentLoaded', function() {
 
     try {
 
         const defaultLat = 24.9460;
+
         const defaultLng = 67.1069;
 
         map = L.map('map', {
 
             center: [defaultLat, defaultLng],
+
             zoom: 13,
+
             zoomControl: true,
+
             tap: true,
+
             dragging: true,
+
             touchZoom: true,
+
             scrollWheelZoom: true
 
         });
@@ -505,11 +545,9 @@ document.addEventListener('DOMContentLoaded', function() {
         L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             {
-
                 attribution: '© OpenStreetMap',
                 maxZoom: 19,
                 minZoom: 3
-
             }
         ).addTo(map);
 
@@ -521,11 +559,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
 
 
-        // Map click location selection
-
         map.on('click', function(e) {
 
             const lat = e.latlng.lat;
+
             const lng = e.latlng.lng;
 
             if (marker) {
@@ -545,8 +582,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
 
-        // Mobile orientation
-
         window.addEventListener('orientationchange', function() {
 
             setTimeout(function() {
@@ -557,8 +592,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         });
 
-
-        // Window resize
 
         window.addEventListener('resize', function() {
 
@@ -582,9 +615,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// ============================================
+// ==================================================
 // COMPENSATION OPTIONS
-// ============================================
+// ==================================================
 
 function toggleCompensationOptions() {
 
@@ -605,9 +638,9 @@ function toggleCompensationOptions() {
 }
 
 
-// ============================================
+// ==================================================
 // CURRENT LOCATION
-// ============================================
+// ==================================================
 
 function getCurrentLocation(e) {
 
@@ -616,7 +649,6 @@ function getCurrentLocation(e) {
         alert('GPS is not supported by your browser.');
 
         return;
-
     }
 
     const locationButton = e.currentTarget;
@@ -631,11 +663,15 @@ function getCurrentLocation(e) {
         function(position) {
 
             const lat = position.coords.latitude;
+
             const lng = position.coords.longitude;
+
             const accuracy = position.coords.accuracy;
 
             console.log('Latitude:', lat);
+
             console.log('Longitude:', lng);
+
             console.log('GPS Accuracy:', accuracy, 'meters');
 
 
@@ -652,7 +688,6 @@ function getCurrentLocation(e) {
                 locationButton.disabled = false;
 
                 return;
-
             }
 
 
@@ -702,7 +737,9 @@ function getCurrentLocation(e) {
         {
 
             enableHighAccuracy: true,
+
             timeout: 30000,
+
             maximumAge: 0
 
         }
