@@ -255,17 +255,18 @@ function toggleCompensationOptions() {
 }
 
 
+
 function getCurrentLocation(e) {
 
     if (!navigator.geolocation) {
-        alert('Geolocation is not supported by your browser.');
+        alert('Geolocation is not supported.');
         return;
     }
 
-    const locationButton = e.currentTarget;
+    const button = e.currentTarget;
 
-    locationButton.textContent = 'Getting location...';
-    locationButton.disabled = true;
+    button.disabled = true;
+    button.textContent = 'Getting location...';
 
     navigator.geolocation.getCurrentPosition(
 
@@ -275,19 +276,21 @@ function getCurrentLocation(e) {
             const lng = position.coords.longitude;
             const accuracy = position.coords.accuracy;
 
-            console.log('GPS Latitude:', lat);
-            console.log('GPS Longitude:', lng);
-            console.log('GPS Accuracy:', accuracy, 'meters');
+            console.log('Latitude:', lat);
+            console.log('Longitude:', lng);
+            console.log('Accuracy:', accuracy);
 
+            // Do not silently accept a poor location
             if (accuracy > 100) {
                 alert(
-                    'GPS accuracy is too low: ' +
-                    Math.round(accuracy) +
-                    ' meters. Please try again outdoors.'
+                    'Windows returned an inaccurate location.\n' +
+                    'Accuracy: ' + Math.round(accuracy) +
+                    ' metres.\n\n' +
+                    'Enable Windows location services or use a phone.'
                 );
 
-                locationButton.textContent = '📍 Use Current Location';
-                locationButton.disabled = false;
+                button.disabled = false;
+                button.textContent = '📍 Use Current Location';
                 return;
             }
 
@@ -306,40 +309,21 @@ function getCurrentLocation(e) {
             marker = L.marker([lat, lng]).addTo(map);
 
             alert(
-                'Location captured successfully!\n' +
-                'Accuracy: ' + Math.round(accuracy) + ' meters'
+                'Location captured!\nAccuracy: ' +
+                Math.round(accuracy) + ' metres'
             );
 
-            locationButton.textContent = '📍 Use Current Location';
-            locationButton.disabled = false;
+            button.disabled = false;
+            button.textContent = '📍 Use Current Location';
 
         },
 
         function(error) {
 
-            let message = 'Unable to get location: ';
+            alert('Location error: ' + error.message);
 
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    message += 'Location permission denied.';
-                    break;
-
-                case error.POSITION_UNAVAILABLE:
-                    message += 'Location unavailable.';
-                    break;
-
-                case error.TIMEOUT:
-                    message += 'Request timed out.';
-                    break;
-
-                default:
-                    message += error.message;
-            }
-
-            alert(message);
-
-            locationButton.textContent = '📍 Use Current Location';
-            locationButton.disabled = false;
+            button.disabled = false;
+            button.textContent = '📍 Use Current Location';
 
         },
 
@@ -350,6 +334,7 @@ function getCurrentLocation(e) {
         }
     );
 }
+
 
 </script>
 {% endblock %}
