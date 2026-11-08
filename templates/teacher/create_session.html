@@ -30,28 +30,6 @@
         font-family: inherit;
     }
 </style>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-<style>
-.flatpickr-confirm-btn {
-    display: block;
-    width: calc(100% - 20px);
-    margin: 10px;
-    padding: 11px;
-    background: #2563eb;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.flatpickr-confirm-btn:hover {
-    background: #1d4ed8;
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -81,15 +59,8 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Start Time <span class="text-red-500">*</span>
                     </label>
-                    <input type="text"
-       name="start_time"
-       id="start_time"
-       placeholder="Select Start Date and Time"
-       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-
-<p id="startStatus" class="text-sm text-gray-500 mt-2">
-    Not confirmed
-</p>
+                    <input type="datetime-local" name="start_time" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <!-- End Time -->
@@ -97,15 +68,8 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         End Time <span class="text-red-500">*</span>
                     </label>
-                    <input type="text"
-       name="end_time"
-       id="end_time"
-       placeholder="Select End Date and Time"
-       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-
-<p id="endStatus" class="text-sm text-gray-500 mt-2">
-    Not confirmed
-</p>
+                    <input type="datetime-local" name="end_time" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 
             </div>
@@ -290,8 +254,8 @@ function toggleCompensationOptions() {
     }
 }
 
-
 function getCurrentLocation(e) {
+    function getCurrentLocation(e) {
 
     if (!navigator.geolocation) {
         alert('GPS is not supported by your browser.');
@@ -311,16 +275,16 @@ function getCurrentLocation(e) {
             const lng = position.coords.longitude;
             const accuracy = position.coords.accuracy;
 
-            console.log('GPS Latitude:', lat);
-            console.log('GPS Longitude:', lng);
+            console.log('Latitude:', lat);
+            console.log('Longitude:', lng);
             console.log('GPS Accuracy:', accuracy, 'meters');
 
             if (accuracy > 100) {
 
                 alert(
-                    'Location accuracy is too low (' +
+                    'Location is not accurate enough. Current GPS accuracy is ' +
                     Math.round(accuracy) +
-                    ' meters). Please enable precise location and try again.'
+                    ' meters. Please enable precise location or use your phone.'
                 );
 
                 locationButton.textContent = '📍 Use Current Location';
@@ -328,11 +292,8 @@ function getCurrentLocation(e) {
                 return;
             }
 
-            document.getElementById('location_lat').value =
-                lat.toFixed(6);
-
-            document.getElementById('location_lng').value =
-                lng.toFixed(6);
+            document.getElementById('location_lat').value = lat.toFixed(6);
+            document.getElementById('location_lng').value = lng.toFixed(6);
 
             map.setView([lat, lng], 18);
 
@@ -343,8 +304,8 @@ function getCurrentLocation(e) {
             marker = L.marker([lat, lng]).addTo(map);
 
             alert(
-                'Location captured successfully!\n' +
-                'GPS Accuracy: ' + Math.round(accuracy) + ' meters'
+                'Accurate location captured!\n' +
+                'Accuracy: ' + Math.round(accuracy) + ' meters'
             );
 
             locationButton.textContent = '📍 Use Current Location';
@@ -354,27 +315,7 @@ function getCurrentLocation(e) {
 
         function(error) {
 
-            let errorMsg = 'Error getting location: ';
-
-            switch(error.code) {
-
-                case error.PERMISSION_DENIED:
-                    errorMsg += 'Please enable location permissions.';
-                    break;
-
-                case error.POSITION_UNAVAILABLE:
-                    errorMsg += 'Location information unavailable.';
-                    break;
-
-                case error.TIMEOUT:
-                    errorMsg += 'Location request timed out.';
-                    break;
-
-                default:
-                    errorMsg += error.message;
-            }
-
-            alert(errorMsg);
+            alert('Unable to get accurate location: ' + error.message);
 
             locationButton.textContent = '📍 Use Current Location';
             locationButton.disabled = false;
@@ -388,153 +329,71 @@ function getCurrentLocation(e) {
         }
     );
 }
-
-// ==========================================
-// CUSTOM DATE TIME PICKER WITH INTERNAL OK
-// ==========================================
-
-const confirmedTimes = {
-    start_time: false,
-    end_time: false
-};
-
-function initializeDatePicker(id) {
-
-    flatpickr("#" + id, {
-
-        enableTime: true,
-
-        dateFormat: "Y-m-d\\TH:i",
-
-        altInput: true,
-
-        altFormat: "m/d/Y h:i K",
-
-        altInputClass:
-            "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500",
-
-        time_24hr: false,
-
-        minuteIncrement: 1,
-
-        allowInput: false,
-
-        onReady: function(dates, dateStr, instance) {
-
-            const okButton = document.createElement("button");
-
-            okButton.type = "button";
-
-            okButton.textContent = "OK";
-
-            okButton.className = "flatpickr-confirm-btn";
-
-            okButton.addEventListener("click", function() {
-
-                if (!instance.selectedDates.length) {
-                    alert("Please select date and time first.");
-                    return;
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser');
+        return;
+    }
+    
+    const locationButton = e && e.target ? e.target : null;
+    if (locationButton) {
+        locationButton.textContent = '⏳ Getting location...';
+        locationButton.disabled = true;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            try {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                document.getElementById('location_lat').value = lat.toFixed(6);
+                document.getElementById('location_lng').value = lng.toFixed(6);
+                
+                map.setView([lat, lng], 16);
+                
+                if (marker) {
+                    map.removeLayer(marker);
                 }
-
-                const startInput =
-                    document.getElementById("start_time");
-
-                const endInput =
-                    document.getElementById("end_time");
-
-                const selectedDate = instance.selectedDates[0];
-
-                if (id === "start_time" && endInput.value) {
-
-                    if (selectedDate >= new Date(endInput.value)) {
-                        alert("Start time must be before end time.");
-                        return;
-                    }
+                marker = L.marker([lat, lng]).addTo(map);
+                
+                alert('Location captured successfully!');
+            } catch (error) {
+                console.error('Error setting location:', error);
+                alert('Error setting location on map');
+            } finally {
+                if (locationButton) {
+                    locationButton.textContent = '📍 Use Current Location';
+                    locationButton.disabled = false;
                 }
-
-                if (id === "end_time" && startInput.value) {
-
-                    if (selectedDate <= new Date(startInput.value)) {
-                        alert("End time must be after start time.");
-                        return;
-                    }
-                }
-
-                confirmedTimes[id] = true;
-
-                document.getElementById(
-                    id === "start_time" ? "startStatus" : "endStatus"
-                ).textContent = "✓ Confirmed";
-
-                document.getElementById(
-                    id === "start_time" ? "startStatus" : "endStatus"
-                ).className =
-                    "text-sm text-green-700 font-semibold mt-2";
-
-                instance.close();
-
-            });
-
-            instance.calendarContainer.appendChild(okButton);
+            }
         },
-
-        onChange: function() {
-
-            confirmedTimes[id] = false;
-
-            const status = document.getElementById(
-                id === "start_time" ? "startStatus" : "endStatus"
-            );
-
-            status.textContent = "Not confirmed";
-
-            status.className = "text-sm text-gray-500 mt-2";
+        function(error) {
+            let errorMsg = 'Error getting location: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg += 'Please enable location permissions';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg += 'Location information unavailable';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg += 'Location request timed out';
+                    break;
+                default:
+                    errorMsg += error.message;
+            }
+            alert(errorMsg);
+            if (locationButton) {
+                locationButton.textContent = '📍 Use Current Location';
+                locationButton.disabled = false;
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
-    });
+    );
 }
-
-
-// Initialize date pickers
-document.addEventListener("DOMContentLoaded", function() {
-
-    if (typeof flatpickr === "undefined") {
-        alert("Date picker library failed to load.");
-        return;
-    }
-
-    initializeDatePicker("start_time");
-
-    initializeDatePicker("end_time");
-
-});
-
-
-// Confirm both times before submitting
-document.getElementById("sessionForm").addEventListener("submit", function(e) {
-
-    const start = document.getElementById("start_time").value;
-
-    const end = document.getElementById("end_time").value;
-
-    if (!start || !end ||
-        !confirmedTimes.start_time ||
-        !confirmedTimes.end_time) {
-
-        e.preventDefault();
-
-        alert("Please select and confirm both Start Time and End Time.");
-
-        return;
-    }
-
-    if (new Date(end) <= new Date(start)) {
-
-        e.preventDefault();
-
-        alert("End time must be after Start time.");
-
-    }
-
-});
 </script>
 {% endblock %}
