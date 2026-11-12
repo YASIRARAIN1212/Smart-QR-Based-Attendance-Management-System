@@ -55,9 +55,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700 text-sm">
 
             <div class="space-y-2">
-                <p><strong>Subject Code:</strong> {{ class_session.subject.code }}</p>
-                <p><strong>Start Time:</strong> {{ class_session.start_time.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
-                <p><strong>End Time:</strong> {{ class_session.end_time.strftime('%I:%M %p') }}</p>
+                <p><strong>Start Time:</strong> {{ start_time_local.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+
+<p><strong>End Time:</strong> {{ end_time_local.strftime('%I:%M %p') }}</p>
             </div>
 
             <div class="space-y-2">

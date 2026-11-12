@@ -414,13 +414,33 @@ def view_session(session_id):
         if record.verification_status == 'VERIFIED'
     )
 
+     
+    # Convert stored UTC session times to Pakistan time
+    pakistan_tz = pytz.timezone('Asia/Karachi')
+
+    start_time_local = session_obj.start_time
+    end_time_local = session_obj.end_time
+
+    if start_time_local.tzinfo is None:
+        start_time_local = pytz.UTC.localize(start_time_local)
+
+    if end_time_local.tzinfo is None:
+        end_time_local = pytz.UTC.localize(end_time_local)
+
+    start_time_local = start_time_local.astimezone(pakistan_tz)
+    end_time_local = end_time_local.astimezone(pakistan_tz)
+
+  
     return render_template(
-        'teacher/view_session.html',
-        user=user,
-        class_session=session_obj,
-        attendance_records=attendance_records,
-        verified_count=verified_count
-    )
+    'teacher/view_session.html',
+    user=user,
+    class_session=session_obj,
+    attendance_records=attendance_records,
+    verified_count=verified_count,
+    start_time_local=start_time_local,
+    end_time_local=end_time_local
+)
+
 
 
 # =====================================================
